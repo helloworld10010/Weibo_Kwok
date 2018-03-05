@@ -79,7 +79,7 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                    Laravel
+                    Weibo-Kwok power by Laravel!
                 </div>
 
                 <div class="links">
