@@ -25,3 +25,7 @@ Route::get('/','StaticPagesController@home') -> name('home');
 Route::get('/help','StaticPagesController@help') -> name('help');
 Route::get('/about','StaticPagesController@about') -> name('about');
 Route::get('/sign','UserController@create') -> name('signup');
+/*
+ * Laravel 为我们提供了 resource 方法来定义用户资源路由
+ */
+Route::resource('users','UserController');
