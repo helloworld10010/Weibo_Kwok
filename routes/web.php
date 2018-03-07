@@ -29,3 +29,9 @@ Route::get('/sign','UserController@create') -> name('signup');
  * Laravel 为我们提供了 resource 方法来定义用户资源路由
  */
 Route::resource('users','UserController');
+#显示登录页面
+Route::get('login', 'SessionsController@create')->name('login');
+#创建新会话（登录）
+Route::post('login', 'SessionsController@store')->name('login');
+#	销毁会话（退出登录）
+Route::delete('logout', 'SessionsController@destroy')->name('logout');
