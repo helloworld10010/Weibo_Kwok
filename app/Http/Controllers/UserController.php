@@ -14,6 +14,8 @@ class UserController extends Controller
     /*
      * Laravel 将会自动查找 ID 为 1 的用户并赋值到变量 $user 中，如果数据库中找不到对应的模型实例
      * 我们将用户对象 $user 通过 compact 方法转化为一个关联数组，并作为第二个参数传递给 view 方法，将数据与视图进行绑定。
+     *
+     * /users/1
      */
     public function show(User $user){
         return view('users.show',compact('user'));
@@ -35,13 +37,16 @@ class UserController extends Controller
             'email' => 'required|email|unique:users|max:255',
             'password' => 'required|confirmed|min:6'
         ]);
-
-        $user = User::crete([
+        // 这段有毛病
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => bcrypt($request->password),
         ]);
 
-        return redirect()->route('user.show',[$user]);
+        session()->flash('success', '欢迎，您将在这里开启一段新的旅程~');
+        return redirect()->route('users.show', [$user]);
+        #echo "what happened";
     }
+
 }
