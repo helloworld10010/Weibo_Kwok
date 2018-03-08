@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 
 class SessionsController extends Controller
@@ -22,6 +23,7 @@ class SessionsController extends Controller
         //watch-poll被关掉了
         //前面我们介绍过的 Auth::attempt() 方法可接收两个参数，第一个参数为需要进行用户身份认证的数组，
         //第二个参数为是否为用户开启『记住我』功能的布尔值。
+        //检查路由，检查视图，在路由跳转前 dd输出下
         if (Auth::attempt($credentials,$request->has('remember'))) {
             // 登录成功后的相关操作
             session()->flash('success', '欢迎回来！');
