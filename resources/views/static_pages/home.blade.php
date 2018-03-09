@@ -2,6 +2,7 @@
 
 @section('title','主页')
 @section('content')
+    @bdump(auth()->user())
     <div class="jumbotron">
         <h1>Hello Laravel</h1>
         <p class="lead">

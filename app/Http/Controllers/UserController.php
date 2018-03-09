@@ -8,6 +8,19 @@ use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
+    public function __construct() {
+        // 中间件用于控制某些http请求
+        // 除了此处指定的动作以外，所有其他动作都必须登录用户才能访问
+        // Laravel 提供的 Auth 中间件在过滤指定动作时，如该用户未通过身份验证（未登录用户），默认将会被重定向到 /login 登录页面。
+        $this->middleware('auth',[
+            'except' => ['show','create','store','index']
+        ]);
+        // 只让未登录的访问注册界面
+        $this->middleware('guest',[
+            'only' => ['create']
+        ]);
+    }
+
     public function create(){
         # 返回页面
         return view('users.create');
@@ -48,6 +61,67 @@ class UserController extends Controller
         session()->flash('success', '欢迎，您将在这里开启一段新的旅程~');
         return redirect()->route('users.show', [$user]);
         #echo "what happened";
+    }
+
+    /**
+     * 编辑页面
+     * @param User $user
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\Vie
+     */
+    public function edit(User $user){
+        //这里 update 是指授权类里的 update 授权方法，$user 对应传参 update 授权方法的第二个参数。正如上面定义 update 授权方法时候提起的，调
+        //用时，默认情况下，我们 不需要 传递第一个参数，也就是当前登录用户至该方法内，因为框架会自动加载当前登录用户。
+        $this->authorize('update',$user);
+        return view('users.edit',compact('user'));
+    }
+
+    /**
+     * 更新用户信息
+     * @param User $user
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     * 在每次更改个人资料的时候都输入完整的密码，才能更新其它信息，对于不想对密码进行更新的用户，这个过程会比较繁琐；
+     * 更新成功之后在页面上没有进行任何提示，而是直接跳转到用户的个人页面，用户体验非常不好
+     * 未登录用户可以访问 edit 和 update 动作；
+     * 登录用户可以更新其它用户的个人信息；
+     */
+    public function update(User $user, Request $request) {
+
+        $this->validate($request, [
+            'name' => 'required|max:50',
+            'password' => 'nullable|confirmed|min:6'
+        ]);
+
+        // 也就是当前用户必须满足授权策略中的update方法
+        $this->authorize('update',$user);
+
+        $data=[];
+        $data['name']=$request->name;
+        if($request->password){
+            $data['password']=bcrypt($request->password);
+        }
+
+        $user->update($data);
+        session()->flash('success',"个人资料更新成功");
+
+        return redirect()->route('users.show', $user->id);
+    }
+
+    public function index() {
+        //Eloquent用户模型 跟orm似的
+        $users = User::paginate(10);
+        return view('users.index', compact('users'));
+    }
+
+    public function destroy(User $user){
+        // 删除授权策略 destroy 我们已经在上面创建了，这里我们在用户控制器中使用 authorize 方法来对删除操作进行授权验证即可。
+        // 在删除动作的授权中，我们规定只有当前用户为管理员，且被删除用户不是自己时，授权才能通过。
+        // 也就是当前用户必须满足(授权策略中的destroy方法)
+        $this->authorize('destroy', $user);
+        $user->delete();
+        session()->flash('success','删除用户成功！');
+        //最后将用户重定向到上一次进行删除操作的页面，即用户列表页
+        return back();
     }
 
 }

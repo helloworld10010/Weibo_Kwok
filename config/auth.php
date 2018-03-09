@@ -56,6 +56,8 @@ return [
     | users are actually retrieved out of your database or other storage
     | mechanisms used by this application to persist your user's data.
     |
+    | 所有身份验证驱动程序都有一个用户提供程序。这定义了如何从您的数据库或该应用程序使用的其他存储机制中检索用户，以保存用户的数据。
+    |
     | If you have multiple user tables or models you may configure multiple
     | sources which represent each model / table. These sources may then
     | be assigned to any extra authentication guards you have defined.
