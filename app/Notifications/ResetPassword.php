@@ -8,7 +8,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 //定制消息通知文件
 class ResetPassword extends Notification {
-    use Queueable;
     public $token;
 
     /**
