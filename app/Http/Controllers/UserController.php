@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -13,7 +14,7 @@ class UserController extends Controller
         // 除了此处指定的动作以外，所有其他动作都必须登录用户才能访问
         // Laravel 提供的 Auth 中间件在过滤指定动作时，如该用户未通过身份验证（未登录用户），默认将会被重定向到 /login 登录页面。
         $this->middleware('auth',[
-            'except' => ['show','create','store','index']
+            'except' => ['show','create','store','index','confirmEmail']
         ]);
         // 只让未登录的访问注册界面
         $this->middleware('guest',[
@@ -57,9 +58,11 @@ class UserController extends Controller
             'email' => $request->email,
             'password' => bcrypt($request->password),
         ]);
-        Auth::login($user);
-        session()->flash('success', '欢迎，您将在这里开启一段新的旅程~');
-        return redirect()->route('users.show', [$user]);
+        #Auth::login($user);
+        $this->sendEmailConfirmationTo($user);
+
+        session()->flash('success', '验证邮件已发送到你的注册邮箱上，请注意查收。');
+        return redirect()->route('home');
         #echo "what happened";
     }
 
@@ -122,6 +125,47 @@ class UserController extends Controller
         session()->flash('success','删除用户成功！');
         //最后将用户重定向到上一次进行删除操作的页面，即用户列表页
         return back();
+    }
+
+    /**
+     * Mail 的 send 方法接收三个参数。
+        第一个参数是包含邮件消息的视图名称。
+        第二个参数是要传递给该视图的数据数组。
+        最后是一个用来接收邮件消息实例的闭包回调，我们可以在该回调中自定义邮件消息的发送者、接收者、邮件主题等信息。
+     *
+     * @param $user
+     */
+    protected function sendEmailConfirmationTo($user) {
+        $view = 'emails.confirm';
+        $data = compact('user');
+        $from = 'kwok@tencent.com';
+        $name = 'Kwok';
+        $to = $user->email;
+        $subject = "感谢注册 Weibo 应用！请确认你的邮箱。";
+
+        Mail::send($view, $data, function ($message) use ($from, $name, $to, $subject) {
+            $message->from($from, $name)->to($to)->subject($subject);
+        });
+    }
+
+    /**
+     * 据路由传送过来的 activation_token 参数从数据库中查找相对应的用户，Eloquent 的 where 方法接收两个参数，
+     * 第一个参数为要进行查找的字段名称，第二个参数为对应的值，查询结果返回的是一个数组，因此我们需要使用 firstOrFail 方法来取出第一个用户，
+     * 在查询不到指定用户时将返回一个 404 响应。在查询到用户信息后，我们会将该用户的激活状态改为 true，激活令牌设置为空。
+     * 最后将激活成功的用户进行登录，并在页面上显示消息提示和重定向到个人页面。
+     * @param $token
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function confirmEmail($token) {
+        $user = User::where('activation_token', $token)->firstOrFail();
+
+        $user->activated = true;
+        $user->activation_token = null;
+        $user->save();
+
+        Auth::login($user);
+        session()->flash('success', '恭喜你，激活成功！');
+        return redirect()->route('users.show', [$user]);
     }
 
 }

@@ -34,4 +34,17 @@ class User extends Authenticatable
         $hash = md5(strtolower(trim($this->attributes['email'])));
         return "http://www.gravatar.com/avatar/$hash?s=$size";
     }
+
+    /**
+     * 会在用户模型类完成初始化之后进行加载，因此我们对事件的监听需要放在该方法中。
+     * 现在，我们需要更新模型工厂，将生成的假用户和第一位用户都设为已激活状态。
+     */
+    public static function boot() {
+        parent::boot();
+        // 用户创建前生成令牌，随着邮件发送给用户激活
+        static::creating(function ($user) {
+            // 监听用户创建，token随机
+            $user->activation_token = str_random(30);
+        });
+    }
 }

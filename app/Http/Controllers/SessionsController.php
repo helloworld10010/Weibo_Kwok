@@ -33,9 +33,16 @@ class SessionsController extends Controller
         //第二个参数为是否为用户开启『记住我』功能的布尔值。
         //检查路由，检查视图，在路由跳转前 dd输出下
         if (Auth::attempt($credentials,$request->has('remember'))) {
-            // 登录成功后的相关操作
-            session()->flash('success', '欢迎回来！');
-            return redirect()->intended(route('users.show', [Auth::user()]));
+            // 已激活
+            if(Auth::user()->activated) {
+                session()->flash('success', '欢迎回来！');
+                return redirect()->intended(route('users.show', [Auth::user()]));
+            } else {
+                // 这就已经登录了？所以需要登出？
+                Auth::logout();
+                session()->flash('warning', '你的账号未激活，请检查邮箱中的注册邮件进行激活。');
+                return redirect('/');
+            }
         } else {
             // 登录失败后的相关操作
             session()->flash('danger', '很抱歉，您的邮箱和密码不匹配');
