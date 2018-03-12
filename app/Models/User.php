@@ -5,6 +5,7 @@ namespace app\Models;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Notifications\ResetPassword;
+use App\Models\Status;
 
 class User extends Authenticatable
 
@@ -55,5 +56,20 @@ class User extends Authenticatable
      */
     public function sendPasswordResetNotification($token) {
         $this->notify(new ResetPassword($token));
+    }
+
+    //动态
+    public function statuses() {
+        return $this->hasMany(Status::class);
+    }
+
+    /**
+     * 我们需要在用户模型中定义一个 feed 方法，该方法将当前用户发布过的所有微博从数据库中取出，并根据创建时间来倒序排序。
+     * 在后面我们为用户增加关注人的功能之后，将使用该方法来获取当前用户关注的人发布过的所有微博动态。现在的 feed 方法定义如下：
+     * @return $this
+     */
+    public function feed() {
+        return $this->statuses()
+            ->orderBy('created_at', 'desc');
     }
 }
