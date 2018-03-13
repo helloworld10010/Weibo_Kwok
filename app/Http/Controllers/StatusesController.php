@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Models\Status;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 
 class StatusesController extends Controller
 {
@@ -19,7 +19,7 @@ class StatusesController extends Controller
         ]);
         //通过数据关联来创建微博
         Auth::user()->statuses()->create([
-            'content' => $request->getContent()
+            'content' => $request->content
         ]);
         return redirect()->back();
     }
