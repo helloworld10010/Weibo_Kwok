@@ -78,7 +78,7 @@ class UserController extends Controller
     public function edit(User $user){
         //这里 update 是指授权类里的 update 授权方法，$user 对应传参 update 授权方法的第二个参数。正如上面定义 update 授权方法时候提起的，调
         //用时，默认情况下，我们 不需要 传递第一个参数，也就是当前登录用户至该方法内，因为框架会自动加载当前登录用户。
-        $this->authorize('update',$user);
+        #$this->authorize('update',$user);
         return view('users.edit',compact('user'));
     }
 
@@ -100,7 +100,7 @@ class UserController extends Controller
         ]);
 
         // 也就是当前用户必须满足授权策略中的update方法
-        $this->authorize('update',$user);
+        #$this->authorize('update',$user);
 
         $data=[];
         $data['name']=$request->name;
