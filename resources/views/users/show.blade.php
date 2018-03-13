@@ -8,9 +8,18 @@
                     <section class="user_info">
                         @include('shared._user_info', ['user' => $user])
                     </section>
+                    {{--社交信息统计视图--}}
+                    <section class="stats">
+                        @include('shared._stats', ['user' => $user])
+                    </section>
                 </div>
             </div>
             <div class="col-md-12">
+                {{--关注表单--}}
+                {{--未登录用户不需要渲染关注表单--}}
+                @if (Auth::check())
+                    @include('users._follow_form')
+                @endif
                 @if (count($statuses) > 0)
                     <ol class="statuses">
                         @foreach ($statuses as $status)

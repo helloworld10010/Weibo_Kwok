@@ -19,7 +19,7 @@ class StatusesController extends Controller
         ]);
         //通过数据关联来创建微博
         Auth::user()->statuses()->create([
-            'content' => $request->content
+            'content' => $request->getContent()
         ]);
         return redirect()->back();
     }
